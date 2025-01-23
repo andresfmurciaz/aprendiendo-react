@@ -1,50 +1,12 @@
 import './App.css'
 import './index.css'
-//es un hock de react el cual ayuda a que los componentes sean mas dinamicos y aca se esta importando
+import { Square } from './component/Square'
 import { useState } from 'react'
-//enum para las dos opciones que tienen los jugadores
-const TURNS = {
-  X : 'x',
-  O : 'o'
-}
+import confetti from 'canvas-confetti'
+import { TURNS } from './constants'
+import { checkWinner , checkEndGame} from './logic/board'
+import { WinnerModal } from './component/WinnerModal'
 
-//-------------------------------------------------------------------------------------
-
-//-------------------------------------------------------------------------------------
-
-
-//componente el cual renderiza cada casilla del juego , 
-// recibe children:recibe un board[index] el cual se renderiza con un div  updateBoard:se usa para modificar cada cuadro  
-//  index:en el index de board  isTurn:cuando es el turno de uno o del otro
-const Square = ({children , updateBoard, index, isTurn}) => {
- 
- const classname = `square ${isTurn? 'is-selected' : ' '} ` 
-
-  const handleClick = () => {
-    updateBoard(index) 
-  }
-
-  return (
-    <div  onClick={handleClick}  className={classname}>
-      {children}
-    </div>
-        )
-  } 
-
-//-------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------
-
-
-const WINNER_COMBOS = [
-  [0,1,2],
-  [3,4,5],
-  [6,7,8],
-  [0,3,6],
-  [1,4,7],
-  [2,5,8],
-  [0,4,8],
-  [2,4,6]
-]
 
 
 function App() {
@@ -56,27 +18,14 @@ function App() {
   //me maneja el ganador de el juego esta reprensentado por x o o
   const [winner,setWinner] = useState(null) 
 
-//-------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------
 
-//recorre la lista de los posibles ganadores y si en las posiciones que yta estan escritas esta la misma letra gano.
-  const checkWinner = (boardCheck) => {
+    const resetGame = () => {
 
-      for(const combo of WINNER_COMBOS){
-       const [a,b,c] = combo
-       if(
-        boardCheck[a] && 
-        boardCheck[a] == boardCheck[b] &&
-        boardCheck[a] == boardCheck[c]
-       ) {
-        return boardCheck[a]
-       }
-      }
-return null
+      setBoard(Array(9).fill(null) )
+      setTurn(TURNS.X)
+      setWinner(null)
+    }
 
-  }
-//-------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------
 
 //me actualiza la casilla cuando el jugador le da click en la casilla y tiene otras validaciones importantes
   const updateBoard = (index) => {
@@ -93,25 +42,31 @@ return null
     const newTurn = turn == TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
 
-//mira el ganador 
+    //mira el ganador 
     const newWinner = checkWinner(newBoard)
       if(newWinner)
         {
+          confetti()
           setWinner(newWinner)
+        }else if(checkEndGame(newBoard)) {
+            setWinner(false) //empate
         }
   } 
-//-------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------
+
+
+
+
 
   return (
     <main className='board'>
       <h1> Tik Tak Toe </h1>
+      <button onClick={resetGame}> Resetear juego</button>
       <section className='game'>
         {
-          board.map(( _ , index) => {
+          board.map(( square , index) => {
           return(
            <Square key={index} index={index} updateBoard={updateBoard}  >
-            {board[index]}
+            {square}
            </Square>
           )
           })
@@ -125,6 +80,8 @@ return null
           {TURNS.O}
         </Square>
       </section>
+
+   <WinnerModal resetGame={resetGame} winner={winner}></WinnerModal>
     </main>
   )
 }
