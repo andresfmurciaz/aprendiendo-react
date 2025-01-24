@@ -10,11 +10,28 @@ import { WinnerModal } from './component/WinnerModal'
 
 
 function App() {
-
+ 
   //me modifica el array que representa mi tablero de juego 
-  const [board, setBoard] = useState(Array(9).fill(null))
+  const [board, setBoard] = useState(() =>  {
+    
+  const boardFromStorage = window.localStorage.getItem('board')
+    
+    if(boardFromStorage) return JSON.parse(boardFromStorage)
+     return Array(9).fill(null)
+  
+  })
   //me maneja los turnos los cuales estan representados por un enum ya sea x o o
-  const [turn,setTurn] = useState(TURNS.X)
+  const [turn,setTurn] = useState( () =>{
+
+    const turnFormStorage = window.localStorage.getItem('turn')
+    console.log(turnFormStorage)
+    if(turnFormStorage) return turnFormStorage 
+    return TURNS.X
+
+
+
+    
+  } )
   //me maneja el ganador de el juego esta reprensentado por x o o
   const [winner,setWinner] = useState(null) 
 
@@ -24,6 +41,8 @@ function App() {
       setBoard(Array(9).fill(null) )
       setTurn(TURNS.X)
       setWinner(null)
+      window.localStorage.removeItem('board')
+      window.localStorage.removeItem('turn')
     }
 
 
@@ -41,6 +60,10 @@ function App() {
     //cambia el turno
     const newTurn = turn == TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+
+    //guardar partida
+    window.localStorage.setItem('board' , JSON.stringify(newBoard))
+    window.localStorage.setItem('turn',newTurn)
 
     //mira el ganador 
     const newWinner = checkWinner(newBoard)
