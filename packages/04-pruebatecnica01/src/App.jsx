@@ -23,10 +23,25 @@ function App() {
       .catch(error => console.error("Error al obtener el hecho del gato:", error))
   }, [])
 
+
+
+  const handleClick = () => {
+    fetch(CAT_ENDPOINT_RANDOM_FACT)
+    .then(res => res.json())
+    .then(data => {
+      const { fact } = data
+      setFact(fact)
+     }, [])
+
+  }
+
+
+
   return (
     <main>
+      <button onClick={handleClick}>New IMG </button>
       <h1 >Gatos</h1>
-      <p>{fact}</p>
+      {fact && <p>{fact}</p>}
       {imgURL && <img src={imgURL} alt="Gato aleatorio" />}
     </main>
   )
